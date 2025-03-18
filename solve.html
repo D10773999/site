@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF - 8">
+    <title>Quadratic Equation Solver</title>
+</head>
+
+<body>
+    <script>
+        // (1) 调用prompt函数三次获取系数a, b, c
+        var aStr = prompt("请输入系数a (a > 0)");
+        var bStr = prompt("请输入系数b");
+        var cStr = prompt("请输入系数c");
+
+        // (2) 使用parseFloat将输入转换为数字
+        var a = parseFloat(aStr);
+        var b = parseFloat(bStr);
+        var c = parseFloat(cStr);
+
+        // (3) 计算判别式delta
+        var delta = b * b - 4 * a * c;
+
+        // (4) 计算方程的两个根
+        var x1 = (-b + Math.sqrt(delta)) / (2 * a);
+        var x2 = (-b - Math.sqrt(delta)) / (2 * a);
+
+        // (5) 使用alert告知用户x1和x2的值
+        alert("方程的根为：x1 = " + x1 + ", x2 = " + x2);
+
+        // (6) 使用console.log告知用户相同的结果
+        console.log("方程的根为：x1 = " + x1 + ", x2 = " + x2);
+
+        // (7) 测试程序
+        // 手动在浏览器中多次输入不同的a, b, c值来测试程序，可能遇到的问题：
+        // - 如果用户输入非数字值，在转换为数字时会得到NaN，导致后续计算错误。
+        // - 如果a输入为0，会导致除零错误，因为在计算根的公式中会除以2 * a。
+        // - 如果delta小于0，在计算平方根时会返回NaN，因为Math.sqrt函数对于负数输入返回NaN。
+    </script>
+</body>
+
+</html>
