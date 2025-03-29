@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>二次方程求解</title>
+</head>
+<body>
+    <input type="number" id="a" placeholder="a"> x² +
+    <input type="number" id="b" placeholder="b"> x +
+    <input type="number" id="c" placeholder="c"> = 0
+    <button onclick="solveEquation()">Solve</button>
+    <div id="solutionArea">Solution area</div>
+
+    <script>
+        function solveEquation() {
+            const a = parseFloat(document.getElementById('a').value);
+            const b = parseFloat(document.getElementById('b').value);
+            const c = parseFloat(document.getElementById('c').value);
+
+            if (a === 0) {
+                document.getElementById('solutionArea').textContent = "非二次方程（a不能为0）";
+                return;
+            }
+
+            const delta = b * b - 4 * a * c;
+            const solutionArea = document.getElementById('solutionArea');
+
+            if (delta < 0) {
+                const realPart = -b / (2 * a);
+                const imagPart = Math.sqrt(-delta) / (2 * a);
+                solutionArea.textContent = `x1=${realPart}+${imagPart}i, x2=${realPart}-${imagPart}i`;
+            } else {
+                const sqrtDelta = Math.sqrt(delta);
+                const x1 = (-b + sqrtDelta) / (2 * a);
+                const x2 = (-b - sqrtDelta) / (2 * a);
+                if (x1 === x2) {
+                    solutionArea.textContent = `x = ${x1}`;
+                } else {
+                    solutionArea.textContent = `x1 = ${x1}, x2 = ${x2}`;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
