@@ -1,0 +1,38 @@
+import turtle
+import random
+
+screen = turtle.Screen()
+screen.setup(width=800, height=600)
+
+colors = ['red', 'orange', 'yellow', 'green', 'black', 'blue', 'purple']
+balloons = []
+
+def create_balloon():
+    balloon = turtle.Turtle()
+    balloon.shape('circle')
+    balloon.color(random.choice(colors))
+    balloon.penup()
+    x = random.randint(-350, 350)
+    y = -280 
+    balloon.goto(x, y)
+    balloon.diameter = 1
+    balloon.burst_height = random.randint(100, 300) 
+    balloons.append(balloon)
+
+for _ in range(10):
+    create_balloon()
+
+def update_balloons():
+    for balloon in balloons:
+        if balloon.ycor() < balloon.burst_height:
+            balloon.sety(balloon.ycor() + 2)
+            balloon.diameter += 0.1
+            balloon.shapesize(balloon.diameter) 
+        else:
+            balloon.hideturtle() 
+            balloons.remove(balloon)
+    if len(balloons) > 0:
+        screen.ontimer(update_balloons, 50) 
+
+update_balloons()
+turtle.done()
