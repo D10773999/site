@@ -1,14 +1,8 @@
-let sortbylastname = function () {
+let sortbylastname = function() {
     let tbl = document.getElementsByTagName('table')[0];
-    let rows = Array.from(tbl.rows); // Convert NodeList to array
-    
-    // Sort rows by first name
-    rows.sort((a, b) => {
-        let aFirst = a.cells[0].innerHTML.split(' ')[0]; // Get first name from first cell
-        let bFirst = b.cells[0].innerHTML.split(' ')[0];
-        return aFirst.localeCompare(bFirst); // Alphabetical comparison
-    });
-    
+    let rows = Array.from(tbl.rows); // Convert row collection to array
+    // Sort rows by first name (assuming first name is in cell index 0)
+    rows.sort((a, b) => a.cells[0].innerHTML.localeCompare(b.cells[0].innerHTML)); 
     tbl.innerHTML = ''; // Clear existing rows
-    rows.forEach(row => tbl.appendChild(row)); // Re - append sorted rows
+    rows.forEach(row => tbl.appendChild(row)); // Append sorted rows back
 };
