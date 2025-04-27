@@ -1,22 +1,17 @@
-let sortbylastname = function() {
-    let tbl = document.getElementsByTagName('table')[0];
-    let rowArray = [];
-    // Collect all table rows into an array
-    for (let i = 0; i < tbl.rows.length; i++) {
-        rowArray.push(tbl.rows[i]);
-    }
-    // Sort the array by first name (cells[0])
-    rowArray.sort((a, b) => {
-        let firstNameA = a.cells[0].innerText.toLowerCase();
-        let firstNameB = b.cells[0].innerText.toLowerCase();
-        if (firstNameA < firstNameB) return -1;
-        if (firstNameA > firstNameB) return 1;
-        return 0;
-    });
-    // Clear the table
-    tbl.innerHTML = '';
-    // Append the sorted rows back to the table
-    for (let i = 0; i < rowArray.length; i++) {
-        tbl.appendChild(rowArray[i]);
-    }
-};
+function sortbyfirstname() {
+  let tbl = document.getElementsByTagName('table')[0];
+  let rows = [];
+  for (let i = 0; i < tbl.rows.length; i++) {
+    rows.push(tbl.rows[i]);
+  }
+  rows.sort((a, b) => {
+    const aFirst = a.cells[0].innerHTML.toLowerCase();
+    const bFirst = b.cells[0].innerHTML.toLowerCase();
+    return aFirst.localeCompare(bFirst);
+  });
+  while (tbl.firstChild) {
+    tbl.removeChild(tbl.firstChild);
+  }
+  rows.forEach(row => tbl.appendChild(row));
+}
+window.onload = sortbyfirstname;
