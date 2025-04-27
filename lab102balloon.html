@@ -1,38 +1,71 @@
-import turtle
-import random
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flying Balloons</title>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
 
-screen = turtle.Screen()
-screen.setup(width=800, height=600)
+        class Balloon {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height;
+                this.diameter = 20;
+                const colors = ['red', 'orange', 'yellow', 'green', 'black', 'blue', 'purple'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.speed = 1 + Math.random() * 3; // Random rise speed
+                this.burst = false;
+            }
 
-colors = ['red', 'orange', 'yellow', 'green', 'black', 'blue', 'purple']
-balloons = []
+            update() {
+                this.y -= this.speed;
+                // Increase diameter as it rises
+                this.diameter += 0.5; 
 
-def create_balloon():
-    balloon = turtle.Turtle()
-    balloon.shape('circle')
-    balloon.color(random.choice(colors))
-    balloon.penup()
-    x = random.randint(-350, 350)
-    y = -280 
-    balloon.goto(x, y)
-    balloon.diameter = 1
-    balloon.burst_height = random.randint(100, 300) 
-    balloons.append(balloon)
+                // Check burst condition (example: burst when y < 100)
+                if (!this.burst && this.y < 100) {
+                    this.burst = true;
+                }
+            }
 
-for _ in range(10):
-    create_balloon()
+            draw() {
+                if (!this.burst) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.diameter / 2, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                    ctx.closePath();
+                }
+            }
+        }
 
-def update_balloons():
-    for balloon in balloons:
-        if balloon.ycor() < balloon.burst_height:
-            balloon.sety(balloon.ycor() + 2)
-            balloon.diameter += 0.1
-            balloon.shapesize(balloon.diameter) 
-        else:
-            balloon.hideturtle() 
-            balloons.remove(balloon)
-    if len(balloons) > 0:
-        screen.ontimer(update_balloons, 50) 
+        const balloons = [];
+        function createBalloon() {
+            balloons.push(new Balloon());
+        }
 
-update_balloons()
-turtle.done()
+        // Create initial balloons (example: 5)
+        for (let i = 0; i < 5; i++) {
+            createBalloon();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            balloons.forEach(balloon => {
+                balloon.update();
+                balloon.draw();
+            });
+            // Create new balloons over time (optional)
+            if (Math.random() < 0.1) {
+                createBalloon();
+            }
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
