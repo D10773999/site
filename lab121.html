@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galaxy Simulation</title>
+    <title>Solar System Simulation</title>
     <style>
         body {
             margin: 0;
@@ -12,7 +12,7 @@
             background-color: #000;
         }
 
-        #galaxy {
+        #solar-system {
             position: relative;
             width: 1500px;
             height: 800px;
@@ -34,17 +34,9 @@
             transform: translate(-50%, -50%);
         }
 
-        .nebula {
-            position: absolute;
-            border-radius: 50%;
-            opacity: 0.3;
-            filter: blur(20px);
-        }
-
         table {
             border-collapse: collapse;
             width: 100%;
-            margin-top: 20px;
             color: white;
         }
 
@@ -66,20 +58,11 @@
         th.sort-desc::after {
             content: ' ▼';
         }
-
-        .chart-container {
-            width: 400px;
-            height: 300px;
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background-color: white;
-        }
     </style>
 </head>
 
 <body>
-    <div id="galaxy"></div>
+    <div id="solar-system"></div>
     <table id="celestial-table" style="display: none;">
         <thead>
             <tr>
@@ -93,7 +76,6 @@
         <tbody></tbody>
     </table>
     <script>
-        // BallShape 类定义
         class BallShape {
             constructor(name, color, diameter, mass) {
                 this.name = name;
@@ -120,7 +102,6 @@
             }
         }
 
-        // Star 类定义
         class Star extends BallShape {
             constructor(name, color, diameter, mass) {
                 super(name, color, diameter, mass);
@@ -129,7 +110,7 @@
 
             createElement() {
                 const elem = super.createElement();
-                // 添加星星的发光效果
+                // Add star glow effect
                 elem.style.boxShadow = `0 0 ${this.diameter}px ${this.color}`;
                 return elem;
             }
@@ -143,14 +124,13 @@
             }
         }
 
-        // Planet 类定义
         class Planet extends BallShape {
             constructor(name, color, diameter, mass, orbitRadius, orbitSpeed, rotationSpeed) {
                 super(name, color, diameter, mass);
                 this.orbitRadius = orbitRadius;
-                this.orbitSpeed = orbitSpeed; // 公转一圈所需的秒数
-                this.rotationSpeed = rotationSpeed; // 自转一圈所需的秒数
-                this.angle = Math.random() * 360; // 随机起始位置
+                this.orbitSpeed = orbitSpeed; // in seconds for one revolution
+                this.rotationSpeed = rotationSpeed; // in seconds for one rotation
+                this.angle = Math.random() * 360; // Start at random position
                 this.orbitElement = null;
                 this.type = 'planet';
             }
@@ -169,17 +149,17 @@
 
             createElement() {
                 const elem = super.createElement();
-                // 添加行星的旋转动画
+                // Add planet rotation animation
                 elem.style.animation = `rotate ${this.rotationSpeed}s linear infinite`;
 
-                // 创建旋转的关键帧
+                // Create keyframes for rotation
                 const style = document.createElement('style');
                 style.innerHTML = `
-                    @keyframes rotate {
-                        from { transform: translate(-50%, -50%) rotate(0deg); }
-                        to { transform: translate(-50%, -50%) rotate(360deg); }
-                    }
-                `;
+            @keyframes rotate {
+                from { transform: translate(-50%, -50%) rotate(0deg); }
+                to { transform: translate(-50%, -50%) rotate(360deg); }
+            }
+        `;
                 document.head.appendChild(style);
 
                 return elem;
@@ -188,25 +168,25 @@
             updatePosition(time) {
                 if (!this.element) return;
 
-                // 根据时间和公转速度计算当前角度
+                // Calculate current angle based on time and orbit speed
                 this.angle = (time / this.orbitSpeed) * 360;
 
-                // 将角度转换为弧度
+                // Convert angle to radians
                 const radians = (this.angle * Math.PI) / 180;
 
-                // 计算位置
-                const centerX = this.orbitElement.offsetLeft + this.orbitElement.offsetWidth / 2;
-                const centerY = this.orbitElement.offsetTop + this.orbitElement.offsetHeight / 2;
+                // Calculate position
+                const centerX = 750; // Half of 1500px
+                const centerY = 400; // Half of 800px
                 const x = centerX + this.orbitRadius * Math.cos(radians);
                 const y = centerY + this.orbitRadius * Math.sin(radians);
 
-                // 更新元素位置
+                // Update element position
                 this.element.style.left = `${x}px`;
                 this.element.style.top = `${y}px`;
             }
         }
 
-        // 具体行星类定义
+        // Create specific planet classes
         class Mercury extends Planet {
             constructor() {
                 super(
@@ -292,7 +272,7 @@
 
             createElement() {
                 const elem = super.createElement();
-                // 添加土星的环
+                // Add Saturn's rings
                 const rings = document.createElement('div');
                 rings.style.position = 'absolute';
                 rings.style.width = '40px';
@@ -336,28 +316,23 @@
             }
         }
 
-        // SolarSystem 类定义
+        // Solar System Simulation Class
         class SolarSystem {
-            constructor(container, centerX, centerY) {
-                this.container = container;
+            constructor(containerId) {
+                this.container = document.getElementById(containerId);
                 this.bodies = [];
                 this.startTime = Date.now();
                 this.animationId = null;
-                this.centerX = centerX;
-                this.centerY = centerY;
             }
 
             addBody(body) {
                 this.bodies.push(body);
                 if (body instanceof Planet) {
                     body.createOrbit(this.container);
-                    body.orbitElement.style.left = `${this.centerX}px`;
-                    body.orbitElement.style.top = `${this.centerY}px`;
                 }
                 body.render(this.container);
                 if (body instanceof Star) {
-                    body.element.style.left = `${this.centerX}px`;
-                    body.element.style.top = `${this.centerY}px`;
+                    body.positionAtCenter(this.container);
                 }
                 return this;
             }
@@ -365,9 +340,9 @@
             startSimulation() {
                 const animate = () => {
                     const currentTime = Date.now();
-                    const elapsedTime = (currentTime - this.startTime) / 1000; // 以秒为单位
+                    const elapsedTime = (currentTime - this.startTime) / 1000; // in seconds
 
-                    // 更新行星位置
+                    // Update planet positions
                     this.bodies.forEach(body => {
                         if (body instanceof Planet) {
                             body.updatePosition(elapsedTime);
@@ -387,157 +362,98 @@
             }
         }
 
-        // Nebula 类定义
-        class Nebula {
-            constructor(container, centerX, centerY, color, diameter) {
-                this.container = container;
-                this.centerX = centerX;
-                this.centerY = centerY;
-                this.color = color;
-                this.diameter = diameter;
-                this.element = null;
-            }
-
-            createElement() {
-                const elem = document.createElement('div');
-                elem.className = 'nebula';
-                elem.style.width = `${this.diameter}px`;
-                elem.style.height = `${this.diameter}px`;
-                elem.style.backgroundColor = this.color;
-                elem.style.left = `${this.centerX}px`;
-                elem.style.top = `${this.centerY}px`;
-                return elem;
-            }
-
-            render() {
-                this.element = this.createElement();
-                this.container.appendChild(this.element);
-                return this;
-            }
-        }
-
-        // Galaxy 类定义
-        class Galaxy {
-            constructor(containerId) {
-                this.container = document.getElementById(containerId);
-                this.solarSystems = [];
-                this.nebulas = [];
-                this.isDragging = false;
-                this.startX;
-                this.startY;
-                this.offsetX = 0;
-                this.offsetY = 0;
-                this.addEventListeners();
-            }
-
-            addEventListeners() {
-                this.container.addEventListener('mousedown', this.handleMouseDown.bind(this));
-                document.addEventListener('mouseup', this.handleMouseUp.bind(this));
-                document.addEventListener('mousemove', this.handleMouseMove.bind(this));
-            }
-
-            handleMouseDown(e) {
-                this.isDragging = true;
-                this.startX = e.clientX;
-                this.startY = e.clientY;
-            }
-
-            handleMouseUp() {
-                this.isDragging = false;
-            }
-
-            handleMouseMove(e) {
-                if (this.isDragging) {
-                    const dx = e.clientX - this.startX;
-                    const dy = e.clientY - this.startY;
-                    this.offsetX += dx;
-                    this.offsetY += dy;
-                    this.solarSystems.forEach(system => {
-                        system.container.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px)`;
-                    });
-                    this.nebulas.forEach(nebula => {
-                        nebula.element.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px)`;
-                    });
-                    this.startX = e.clientX;
-                    this.startY = e.clientY;
-                }
-            }
-
-            addSolarSystem(solarSystem) {
-                this.solarSystems.push(solarSystem);
-                solarSystem.startSimulation();
-                return this;
-            }
-
-            addNebula(nebula) {
-                this.nebulas.push(nebula);
-                nebula.render();
-                return this;
-            }
-
-            getAllBodies() {
-                let allBodies = [];
-                this.solarSystems.forEach(system => {
-                    allBodies = allBodies.concat(system.bodies);
-                });
-                return allBodies;
-            }
-
-            showMassBarChart() {
-                const allBodies = this.getAllBodies();
-                const chartContainer = document.createElement('div');
-                chartContainer.className = 'chart-container';
-                this.container.appendChild(chartContainer);
-
-                allBodies.forEach(body => {
-                    const bar = document.createElement('div');
-                    bar.style.width = `${body.mass / 1000}px`;
-                    bar.style.height = '20px';
-                    bar.style.backgroundColor = body.color;
-                    bar.style.margin: '5px';
-                    chartContainer.appendChild(bar);
-                });
-            }
-        }
-
+        // Create and run the simulation
         document.addEventListener('DOMContentLoaded', () => {
-            const galaxy = new Galaxy('galaxy');
+            const solarSystem = new SolarSystem('solar-system');
 
-            // 添加星云
-            const nebula1 = new Nebula(galaxy.container, 300, 200, '#FF69B4', 200);
-            galaxy.addNebula(nebula1);
+            // Add the Sun
+            solarSystem.addBody(new Star('Sun', '#f39c12', 50, 333000));
 
-            const nebula2 = new Nebula(galaxy.container, 1200, 600, '#00FFFF', 150);
-            galaxy.addNebula(nebula2);
+            // Add planets (with scaled-down values)
+            solarSystem.addBody(new Mercury());
+            solarSystem.addBody(new Venus());
+            solarSystem.addBody(new Earth());
+            solarSystem.addBody(new Mars());
+            solarSystem.addBody(new Jupiter());
+            solarSystem.addBody(new Saturn());
+            solarSystem.addBody(new Uranus());
+            solarSystem.addBody(new Neptune());
 
-            // 添加多个太阳系
-            const solarSystem1 = new SolarSystem(galaxy.container, 300, 600);
-            solarSystem1.addBody(new Star('Star1', '#f39c12', 30, 200000));
-            solarSystem1.addBody(new Mercury());
-            solarSystem1.addBody(new Venus());
-            galaxy.addSolarSystem(solarSystem1);
+            // Start the simulation
+            solarSystem.startSimulation();
 
-            const solarSystem2 = new SolarSystem(galaxy.container, 1200, 200);
-            solarSystem2.addBody(new Star('Star2', '#FF0000', 40, 250000));
-            solarSystem2.addBody(new Earth());
-            solarSystem2.addBody(new Mars());
-            galaxy.addSolarSystem(solarSystem2);
-
-            // 获取表格元素
             const table = document.getElementById('celestial-table');
             const tbody = table.querySelector('tbody');
             const headers = table.querySelectorAll('th');
             let sortColumn = null;
             let sortDirection = 'asc';
 
-            // 点击页面显示表格
             document.body.addEventListener('click', () => {
                 tbody.innerHTML = '';
-                const allBodies = galaxy.getAllBodies();
-                allBodies.forEach(body => {
+                solarSystem.bodies.forEach(body => {
                     const row = document.createElement('tr');
                     const nameCell = document.createElement('td');
                     const massCell = document.createElement('td');
                     const orbitRadiusCell = document.createElement('td');
                     const colorCell = document.createElement('td');
                     const diameterCell = document.createElement('td');
+
+                    nameCell.textContent = body.name;
+                    massCell.textContent = body.mass;
+                    orbitRadiusCell.textContent = body.orbitRadius || 0;
+                    colorCell.textContent = body.color;
+                    diameterCell.textContent = body.diameter;
+
+                    row.appendChild(nameCell);
+                    row.appendChild(massCell);
+                    row.appendChild(orbitRadiusCell);
+                    row.appendChild(colorCell);
+                    row.appendChild(diameterCell);
+                    tbody.appendChild(row);
+                });
+                table.style.display = 'table';
+            });
+
+            headers.forEach(header => {
+                header.addEventListener('click', () => {
+                    const sortKey = header.dataset.sort;
+                    if (sortColumn === sortKey) {
+                        sortDirection = sortDirection === 'asc'? 'desc' : 'asc';
+                    } else {
+                        sortColumn = sortKey;
+                        sortDirection = 'asc';
+                    }
+
+                    headers.forEach(h => h.classList.remove('sort-asc','sort-desc'));
+                    header.classList.add(sortDirection === 'asc'? 'sort-asc' :'sort-desc');
+
+                    const rows = Array.from(tbody.querySelectorAll('tr'));
+                    rows.sort((a, b) => {
+                        const aValue = a.cells[Array.from(headers).indexOf(header)].textContent;
+                        const bValue = b.cells[Array.from(headers).indexOf(header)].textContent;
+                        let comparison;
+                        if (sortKey ==='mass' || sortKey === 'orbitRadius' || sortKey === 'diameter') {
+                            comparison = parseFloat(aValue) - parseFloat(bValue);
+                        } else {
+                            comparison = aValue.localeCompare(bValue);
+                        }
+                        return sortDirection === 'asc'? comparison : -comparison;
+                    });
+
+                    rows.forEach(row => {
+                        tbody.appendChild(row);
+                    });
+
+                    // 修正排序后插入行的逻辑
+                    rows.forEach((row, index) => {
+                        if (index > 0) {
+                            tbody.insertBefore(row, tbody.children[index]);
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+
+</html> 
