@@ -1,439 +1,89 @@
-// 原有的 BallShape、Star、Planet 及其子类的定义保持不变
-class BallShape {
-    constructor(name, color, diameter, mass) {
-        this.name = name;
-        this.color = color;
-        this.diameter = diameter;
-        this.mass = mass;
-        this.element = null;
-    }
+<!DOCTYPE html>
+<html lang="en">
 
-    createElement() {
-        const elem = document.createElement('div');
-        elem.className = this instanceof Star ? 'star' : 'planet';
-        elem.style.width = `${this.diameter}px`;
-        elem.style.height = `${this.diameter}px`;
-        elem.style.backgroundColor = this.color;
-        elem.title = `${this.name}\nDiameter: ${this.diameter}px\nMass: ${this.mass}`;
-        return elem;
-    }
-
-    render(container) {
-        this.element = this.createElement();
-        container.appendChild(this.element);
-        return this;
-    }
-}
-
-class Star extends BallShape {
-    constructor(name, color, diameter, mass) {
-        super(name, color, diameter, mass);
-        this.type = 'star';
-    }
-
-    createElement() {
-        const elem = super.createElement();
-        // Add star glow effect
-        elem.style.boxShadow = `0 0 ${this.diameter}px ${this.color}`;
-        return elem;
-    }
-
-    positionAtCenter(container) {
-        if (this.element) {
-            this.element.style.left = '50%';
-            this.element.style.top = '50%';
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaxy Simulation</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
         }
-        return this;
-    }
-}
 
-class Planet extends BallShape {
-    constructor(name, color, diameter, mass, orbitRadius, orbitSpeed, rotationSpeed) {
-        super(name, color, diameter, mass);
-        this.orbitRadius = orbitRadius;
-        this.orbitSpeed = orbitSpeed; // in seconds for one revolution
-        this.rotationSpeed = rotationSpeed; // in seconds for one rotation
-        this.angle = Math.random() * 360; // Start at random position
-        this.orbitElement = null;
-        this.type = 'planet';
-    }
-
-    createOrbit(container) {
-        const orbit = document.createElement('div');
-        orbit.className = 'orbit';
-        orbit.style.width = `${this.orbitRadius * 2}px`;
-        orbit.style.height = `${this.orbitRadius * 2}px`;
-        orbit.style.left = '50%';
-        orbit.style.top = '50%';
-        container.appendChild(orbit);
-        this.orbitElement = orbit;
-        return this;
-    }
-
-    createElement() {
-        const elem = super.createElement();
-        // Add planet rotation animation
-        elem.style.animation = `rotate ${this.rotationSpeed}s linear infinite`;
-
-        // Create keyframes for rotation
-        const style = document.createElement('style');
-        style.innerHTML = `
-            @keyframes rotate {
-                from { transform: translate(-50%, -50%) rotate(0deg); }
-                to { transform: translate(-50%, -50%) rotate(360deg); }
-            }
-        `;
-        document.head.appendChild(style);
-
-        return elem;
-    }
-
-    updatePosition(time) {
-        if (!this.element) return;
-
-        // Calculate current angle based on time and orbit speed
-        this.angle = (time / this.orbitSpeed) * 360;
-
-        // Convert angle to radians
-        const radians = (this.angle * Math.PI) / 180;
-
-        // Calculate position
-        const centerX = this.orbitElement.offsetLeft + this.orbitElement.offsetWidth / 2;
-        const centerY = this.orbitElement.offsetTop + this.orbitElement.offsetHeight / 2;
-        const x = centerX + this.orbitRadius * Math.cos(radians);
-        const y = centerY + this.orbitRadius * Math.sin(radians);
-
-        // Update element position
-        this.element.style.left = `${x}px`;
-        this.element.style.top = `${y}px`;
-    }
-}
-
-// Create specific planet classes
-class Mercury extends Planet {
-    constructor() {
-        super(
-            'Mercury',
-            '#a8a8a8',
-            8,
-            0.055,
-            100,
-            2.4,
-            140.8
-        );
-    }
-}
-
-class Venus extends Planet {
-    constructor() {
-        super(
-            'Venus',
-            '#e6c229',
-            12,
-            0.815,
-            150,
-            6.2,
-            243
-        );
-    }
-}
-
-class Earth extends Planet {
-    constructor() {
-        super(
-            'Earth',
-            '#3498db',
-            12.5,
-            1,
-            200,
-            10,
-            1
-        );
-    }
-}
-
-class Mars extends Planet {
-    constructor() {
-        super(
-            'Mars',
-            '#e27b58',
-            10,
-            0.107,
-            280,
-            18.8,
-            1.03
-        );
-    }
-}
-
-class Jupiter extends Planet {
-    constructor() {
-        super(
-            'Jupiter',
-            '#f1c40f',
-            30,
-            317.8,
-            380,
-            118,
-            0.41
-        );
-    }
-}
-
-class Saturn extends Planet {
-    constructor() {
-        super(
-            'Saturn',
-            '#f39c12',
-            25,
-            95.2,
-            480,
-            294,
-            0.45
-        );
-    }
-
-    createElement() {
-        const elem = super.createElement();
-        // Add Saturn's rings
-        const rings = document.createElement('div');
-        rings.style.position = 'absolute';
-        rings.style.width = '40px';
-        rings.style.height = '10px';
-        rings.style.backgroundColor = 'transparent';
-        rings.style.border = '2px solid #d2b48c';
-        rings.style.borderRadius = '50%';
-        rings.style.transform = 'translate(-50%, -50%) rotate(20deg)';
-        rings.style.top = '50%';
-        rings.style.left = '50%';
-        elem.appendChild(rings);
-        return elem;
-    }
-}
-
-class Uranus extends Planet {
-    constructor() {
-        super(
-            'Uranus',
-            '#1abc9c',
-            20,
-            14.5,
-            550,
-            840,
-            0.72
-        );
-    }
-}
-
-class Neptune extends Planet {
-    constructor() {
-        super(
-            'Neptune',
-            '#3498db',
-            18,
-            17.1,
-            620,
-            1648,
-            0.67
-        );
-    }
-}
-
-// Solar System Simulation Class
-class SolarSystem {
-    constructor(container, centerX, centerY) {
-        this.container = container;
-        this.bodies = [];
-        this.startTime = Date.now();
-        this.animationId = null;
-        this.centerX = centerX;
-        this.centerY = centerY;
-    }
-
-    addBody(body) {
-        this.bodies.push(body);
-        if (body instanceof Planet) {
-            body.createOrbit(this.container);
-            body.orbitElement.style.left = `${this.centerX}px`;
-            body.orbitElement.style.top = `${this.centerY}px`;
+        #galaxy {
+            position: relative;
+            width: 1500px;
+            height: 800px;
+            margin: 0 auto;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #000000 100%);
         }
-        body.render(this.container);
-        if (body instanceof Star) {
-            body.element.style.left = `${this.centerX}px`;
-            body.element.style.top = `${this.centerY}px`;
+
+        .star,
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
         }
-        return this;
-    }
 
-    startSimulation() {
-        const animate = () => {
-            const currentTime = Date.now();
-            const elapsedTime = (currentTime - this.startTime) / 1000; // in seconds
-
-            // Update planet positions
-            this.bodies.forEach(body => {
-                if (body instanceof Planet) {
-                    body.updatePosition(elapsedTime);
-                }
-            });
-
-            this.animationId = requestAnimationFrame(animate);
-        };
-
-        animate();
-    }
-
-    stopSimulation() {
-        if (this.animationId) {
-            cancelAnimationFrame(this.animationId);
+        .orbit {
+            position: absolute;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
         }
-    }
-}
 
-// Nebula class
-class Nebula {
-    constructor(container, centerX, centerY, color, diameter) {
-        this.container = container;
-        this.centerX = centerX;
-        this.centerY = centerY;
-        this.color = color;
-        this.diameter = diameter;
-        this.element = null;
-    }
+        .nebula {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.3;
+            filter: blur(20px);
+        }
 
-    createElement() {
-        const elem = document.createElement('div');
-        elem.className = 'nebula';
-        elem.style.width = `${this.diameter}px`;
-        elem.style.height = `${this.diameter}px`;
-        elem.style.backgroundColor = this.color;
-        elem.style.left = `${this.centerX}px`;
-        elem.style.top = `${this.centerY}px`;
-        return elem;
-    }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+            color: white;
+        }
 
-    render() {
-        this.element = this.createElement();
-        this.container.appendChild(this.element);
-        return this;
-    }
-}
+        th,
+        td {
+            border: 1px solid white;
+            padding: 8px;
+            text-align: left;
+        }
 
-// Galaxy Simulation Class
-class Galaxy {
-    constructor(containerId) {
-        this.container = document.getElementById(containerId);
-        this.solarSystems = [];
-        this.nebulas = [];
-    }
+        th {
+            cursor: pointer;
+        }
 
-    addSolarSystem(solarSystem) {
-        this.solarSystems.push(solarSystem);
-        solarSystem.startSimulation();
-        return this;
-    }
+        th.sort-asc::after {
+            content: ' ▲';
+        }
 
-    addNebula(nebula) {
-        this.nebulas.push(nebula);
-        nebula.render();
-        return this;
-    }
+        th.sort-desc::after {
+            content: ' ▼';
+        }
+    </style>
+</head>
 
-    getAllBodies() {
-        let allBodies = [];
-        this.solarSystems.forEach(system => {
-            allBodies = allBodies.concat(system.bodies);
-        });
-        return allBodies;
-    }
-}
+<body>
+    <div id="galaxy"></div>
+    <table id="celestial-table" style="display: none;">
+        <thead>
+            <tr>
+                <th data-sort="name">Name</th>
+                <th data-sort="mass">Mass</th>
+                <th data-sort="orbitRadius">Orbit Radius</th>
+                <th data-sort="color">Color</th>
+                <th data-sort="diameter">Diameter</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <script src="galaxy.js"></script>
+</body>
 
-// 创建和运行模拟
-document.addEventListener('DOMContentLoaded', () => {
-    const galaxy = new Galaxy('galaxy');
-
-    // 添加星云
-    const nebula1 = new Nebula(galaxy.container, 300, 200, '#FF69B4', 200);
-    galaxy.addNebula(nebula1);
-
-    const nebula2 = new Nebula(galaxy.container, 1200, 600, '#00FFFF', 150);
-    galaxy.addNebula(nebula2);
-
-    // 添加多个太阳系
-    const solarSystem1 = new SolarSystem(galaxy.container, 300, 600);
-    solarSystem1.addBody(new Star('Star1', '#f39c12', 30, 200000));
-    solarSystem1.addBody(new Mercury());
-    solarSystem1.addBody(new Venus());
-    galaxy.addSolarSystem(solarSystem1);
-
-    const solarSystem2 = new SolarSystem(galaxy.container, 1200, 200);
-    solarSystem2.addBody(new Star('Star2', '#FF0000', 40, 250000));
-    solarSystem2.addBody(new Earth());
-    solarSystem2.addBody(new Mars());
-    galaxy.addSolarSystem(solarSystem2);
-
-    // 获取表格元素
-    const table = document.getElementById('celestial-table');
-    const tbody = table.querySelector('tbody');
-    const headers = table.querySelectorAll('th');
-    let sortColumn = null;
-    let sortDirection = 'asc';
-
-    // 点击页面显示表格
-    document.body.addEventListener('click', () => {
-        tbody.innerHTML = '';
-        const allBodies = galaxy.getAllBodies();
-        allBodies.forEach(body => {
-            const row = document.createElement('tr');
-            const nameCell = document.createElement('td');
-            const massCell = document.createElement('td');
-            const orbitRadiusCell = document.createElement('td');
-            const colorCell = document.createElement('td');
-            const diameterCell = document.createElement('td');
-
-            nameCell.textContent = body.name;
-            massCell.textContent = body.mass;
-            orbitRadiusCell.textContent = body.orbitRadius || 0;
-            colorCell.textContent = body.color;
-            diameterCell.textContent = body.diameter;
-
-            row.appendChild(nameCell);
-            row.appendChild(massCell);
-            row.appendChild(orbitRadiusCell);
-            row.appendChild(colorCell);
-            row.appendChild(diameterCell);
-            tbody.appendChild(row);
-        });
-        table.style.display = 'table';
-    });
-
-    // 表格排序功能
-    headers.forEach(header => {
-        header.addEventListener('click', () => {
-            const sortKey = header.dataset.sort;
-            if (sortColumn === sortKey) {
-                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-            } else {
-                sortColumn = sortKey;
-                sortDirection = 'asc';
-            }
-
-            headers.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
-            header.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
-
-            const rows = Array.from(tbody.querySelectorAll('tr'));
-            rows.sort((a, b) => {
-                const aValue = a.cells[Array.from(headers).indexOf(header)].textContent;
-                const bValue = b.cells[Array.from(headers).indexOf(header)].textContent;
-                let comparison;
-                if (sortKey === 'mass' || sortKey === 'orbitRadius' || sortKey === 'diameter') {
-                    comparison = parseFloat(aValue) - parseFloat(bValue);
-                } else {
-                    comparison = aValue.localeCompare(bValue);
-                }
-                return sortDirection === 'asc' ? comparison : -comparison;
-            });
-            rows.forEach(row => tbody.appendChild(row));
-        });
-    });
-});  
+</html> 
