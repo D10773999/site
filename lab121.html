@@ -66,6 +66,15 @@
         th.sort-desc::after {
             content: ' ▼';
         }
+
+        .chart-container {
+            width: 400px;
+            height: 300px;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: white;
+        }
     </style>
 </head>
 
@@ -83,7 +92,452 @@
         </thead>
         <tbody></tbody>
     </table>
-    <script src="galaxy.js"></script>
-</body>
+    <script>
+        // BallShape 类定义
+        class BallShape {
+            constructor(name, color, diameter, mass) {
+                this.name = name;
+                this.color = color;
+                this.diameter = diameter;
+                this.mass = mass;
+                this.element = null;
+            }
 
-</html> 
+            createElement() {
+                const elem = document.createElement('div');
+                elem.className = this instanceof Star? 'star' : 'planet';
+                elem.style.width = `${this.diameter}px`;
+                elem.style.height = `${this.diameter}px`;
+                elem.style.backgroundColor = this.color;
+                elem.title = `${this.name}\nDiameter: ${this.diameter}px\nMass: ${this.mass}`;
+                return elem;
+            }
+
+            render(container) {
+                this.element = this.createElement();
+                container.appendChild(this.element);
+                return this;
+            }
+        }
+
+        // Star 类定义
+        class Star extends BallShape {
+            constructor(name, color, diameter, mass) {
+                super(name, color, diameter, mass);
+                this.type ='star';
+            }
+
+            createElement() {
+                const elem = super.createElement();
+                // 添加星星的发光效果
+                elem.style.boxShadow = `0 0 ${this.diameter}px ${this.color}`;
+                return elem;
+            }
+
+            positionAtCenter(container) {
+                if (this.element) {
+                    this.element.style.left = '50%';
+                    this.element.style.top = '50%';
+                }
+                return this;
+            }
+        }
+
+        // Planet 类定义
+        class Planet extends BallShape {
+            constructor(name, color, diameter, mass, orbitRadius, orbitSpeed, rotationSpeed) {
+                super(name, color, diameter, mass);
+                this.orbitRadius = orbitRadius;
+                this.orbitSpeed = orbitSpeed; // 公转一圈所需的秒数
+                this.rotationSpeed = rotationSpeed; // 自转一圈所需的秒数
+                this.angle = Math.random() * 360; // 随机起始位置
+                this.orbitElement = null;
+                this.type = 'planet';
+            }
+
+            createOrbit(container) {
+                const orbit = document.createElement('div');
+                orbit.className = 'orbit';
+                orbit.style.width = `${this.orbitRadius * 2}px`;
+                orbit.style.height = `${this.orbitRadius * 2}px`;
+                orbit.style.left = '50%';
+                orbit.style.top = '50%';
+                container.appendChild(orbit);
+                this.orbitElement = orbit;
+                return this;
+            }
+
+            createElement() {
+                const elem = super.createElement();
+                // 添加行星的旋转动画
+                elem.style.animation = `rotate ${this.rotationSpeed}s linear infinite`;
+
+                // 创建旋转的关键帧
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    @keyframes rotate {
+                        from { transform: translate(-50%, -50%) rotate(0deg); }
+                        to { transform: translate(-50%, -50%) rotate(360deg); }
+                    }
+                `;
+                document.head.appendChild(style);
+
+                return elem;
+            }
+
+            updatePosition(time) {
+                if (!this.element) return;
+
+                // 根据时间和公转速度计算当前角度
+                this.angle = (time / this.orbitSpeed) * 360;
+
+                // 将角度转换为弧度
+                const radians = (this.angle * Math.PI) / 180;
+
+                // 计算位置
+                const centerX = this.orbitElement.offsetLeft + this.orbitElement.offsetWidth / 2;
+                const centerY = this.orbitElement.offsetTop + this.orbitElement.offsetHeight / 2;
+                const x = centerX + this.orbitRadius * Math.cos(radians);
+                const y = centerY + this.orbitRadius * Math.sin(radians);
+
+                // 更新元素位置
+                this.element.style.left = `${x}px`;
+                this.element.style.top = `${y}px`;
+            }
+        }
+
+        // 具体行星类定义
+        class Mercury extends Planet {
+            constructor() {
+                super(
+                    'Mercury',
+                    '#a8a8a8',
+                    8,
+                    0.055,
+                    100,
+                    2.4,
+                    140.8
+                );
+            }
+        }
+
+        class Venus extends Planet {
+            constructor() {
+                super(
+                    'Venus',
+                    '#e6c229',
+                    12,
+                    0.815,
+                    150,
+                    6.2,
+                    243
+                );
+            }
+        }
+
+        class Earth extends Planet {
+            constructor() {
+                super(
+                    'Earth',
+                    '#3498db',
+                    12.5,
+                    1,
+                    200,
+                    10,
+                    1
+                );
+            }
+        }
+
+        class Mars extends Planet {
+            constructor() {
+                super(
+                    'Mars',
+                    '#e27b58',
+                    10,
+                    0.107,
+                    280,
+                    18.8,
+                    1.03
+                );
+            }
+        }
+
+        class Jupiter extends Planet {
+            constructor() {
+                super(
+                    'Jupiter',
+                    '#f1c40f',
+                    30,
+                    317.8,
+                    380,
+                    118,
+                    0.41
+                );
+            }
+        }
+
+        class Saturn extends Planet {
+            constructor() {
+                super(
+                    'Saturn',
+                    '#f39c12',
+                    25,
+                    95.2,
+                    480,
+                    294,
+                    0.45
+                );
+            }
+
+            createElement() {
+                const elem = super.createElement();
+                // 添加土星的环
+                const rings = document.createElement('div');
+                rings.style.position = 'absolute';
+                rings.style.width = '40px';
+                rings.style.height = '10px';
+                rings.style.backgroundColor = 'transparent';
+                rings.style.border = '2px solid #d2b48c';
+                rings.style.borderRadius = '50%';
+                rings.style.transform = 'translate(-50%, -50%) rotate(20deg)';
+                rings.style.top = '50%';
+                rings.style.left = '50%';
+                elem.appendChild(rings);
+                return elem;
+            }
+        }
+
+        class Uranus extends Planet {
+            constructor() {
+                super(
+                    'Uranus',
+                    '#1abc9c',
+                    20,
+                    14.5,
+                    550,
+                    840,
+                    0.72
+                );
+            }
+        }
+
+        class Neptune extends Planet {
+            constructor() {
+                super(
+                    'Neptune',
+                    '#3498db',
+                    18,
+                    17.1,
+                    620,
+                    1648,
+                    0.67
+                );
+            }
+        }
+
+        // SolarSystem 类定义
+        class SolarSystem {
+            constructor(container, centerX, centerY) {
+                this.container = container;
+                this.bodies = [];
+                this.startTime = Date.now();
+                this.animationId = null;
+                this.centerX = centerX;
+                this.centerY = centerY;
+            }
+
+            addBody(body) {
+                this.bodies.push(body);
+                if (body instanceof Planet) {
+                    body.createOrbit(this.container);
+                    body.orbitElement.style.left = `${this.centerX}px`;
+                    body.orbitElement.style.top = `${this.centerY}px`;
+                }
+                body.render(this.container);
+                if (body instanceof Star) {
+                    body.element.style.left = `${this.centerX}px`;
+                    body.element.style.top = `${this.centerY}px`;
+                }
+                return this;
+            }
+
+            startSimulation() {
+                const animate = () => {
+                    const currentTime = Date.now();
+                    const elapsedTime = (currentTime - this.startTime) / 1000; // 以秒为单位
+
+                    // 更新行星位置
+                    this.bodies.forEach(body => {
+                        if (body instanceof Planet) {
+                            body.updatePosition(elapsedTime);
+                        }
+                    });
+
+                    this.animationId = requestAnimationFrame(animate);
+                };
+
+                animate();
+            }
+
+            stopSimulation() {
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                }
+            }
+        }
+
+        // Nebula 类定义
+        class Nebula {
+            constructor(container, centerX, centerY, color, diameter) {
+                this.container = container;
+                this.centerX = centerX;
+                this.centerY = centerY;
+                this.color = color;
+                this.diameter = diameter;
+                this.element = null;
+            }
+
+            createElement() {
+                const elem = document.createElement('div');
+                elem.className = 'nebula';
+                elem.style.width = `${this.diameter}px`;
+                elem.style.height = `${this.diameter}px`;
+                elem.style.backgroundColor = this.color;
+                elem.style.left = `${this.centerX}px`;
+                elem.style.top = `${this.centerY}px`;
+                return elem;
+            }
+
+            render() {
+                this.element = this.createElement();
+                this.container.appendChild(this.element);
+                return this;
+            }
+        }
+
+        // Galaxy 类定义
+        class Galaxy {
+            constructor(containerId) {
+                this.container = document.getElementById(containerId);
+                this.solarSystems = [];
+                this.nebulas = [];
+                this.isDragging = false;
+                this.startX;
+                this.startY;
+                this.offsetX = 0;
+                this.offsetY = 0;
+                this.addEventListeners();
+            }
+
+            addEventListeners() {
+                this.container.addEventListener('mousedown', this.handleMouseDown.bind(this));
+                document.addEventListener('mouseup', this.handleMouseUp.bind(this));
+                document.addEventListener('mousemove', this.handleMouseMove.bind(this));
+            }
+
+            handleMouseDown(e) {
+                this.isDragging = true;
+                this.startX = e.clientX;
+                this.startY = e.clientY;
+            }
+
+            handleMouseUp() {
+                this.isDragging = false;
+            }
+
+            handleMouseMove(e) {
+                if (this.isDragging) {
+                    const dx = e.clientX - this.startX;
+                    const dy = e.clientY - this.startY;
+                    this.offsetX += dx;
+                    this.offsetY += dy;
+                    this.solarSystems.forEach(system => {
+                        system.container.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px)`;
+                    });
+                    this.nebulas.forEach(nebula => {
+                        nebula.element.style.transform = `translate(${this.offsetX}px, ${this.offsetY}px)`;
+                    });
+                    this.startX = e.clientX;
+                    this.startY = e.clientY;
+                }
+            }
+
+            addSolarSystem(solarSystem) {
+                this.solarSystems.push(solarSystem);
+                solarSystem.startSimulation();
+                return this;
+            }
+
+            addNebula(nebula) {
+                this.nebulas.push(nebula);
+                nebula.render();
+                return this;
+            }
+
+            getAllBodies() {
+                let allBodies = [];
+                this.solarSystems.forEach(system => {
+                    allBodies = allBodies.concat(system.bodies);
+                });
+                return allBodies;
+            }
+
+            showMassBarChart() {
+                const allBodies = this.getAllBodies();
+                const chartContainer = document.createElement('div');
+                chartContainer.className = 'chart-container';
+                this.container.appendChild(chartContainer);
+
+                allBodies.forEach(body => {
+                    const bar = document.createElement('div');
+                    bar.style.width = `${body.mass / 1000}px`;
+                    bar.style.height = '20px';
+                    bar.style.backgroundColor = body.color;
+                    bar.style.margin: '5px';
+                    chartContainer.appendChild(bar);
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const galaxy = new Galaxy('galaxy');
+
+            // 添加星云
+            const nebula1 = new Nebula(galaxy.container, 300, 200, '#FF69B4', 200);
+            galaxy.addNebula(nebula1);
+
+            const nebula2 = new Nebula(galaxy.container, 1200, 600, '#00FFFF', 150);
+            galaxy.addNebula(nebula2);
+
+            // 添加多个太阳系
+            const solarSystem1 = new SolarSystem(galaxy.container, 300, 600);
+            solarSystem1.addBody(new Star('Star1', '#f39c12', 30, 200000));
+            solarSystem1.addBody(new Mercury());
+            solarSystem1.addBody(new Venus());
+            galaxy.addSolarSystem(solarSystem1);
+
+            const solarSystem2 = new SolarSystem(galaxy.container, 1200, 200);
+            solarSystem2.addBody(new Star('Star2', '#FF0000', 40, 250000));
+            solarSystem2.addBody(new Earth());
+            solarSystem2.addBody(new Mars());
+            galaxy.addSolarSystem(solarSystem2);
+
+            // 获取表格元素
+            const table = document.getElementById('celestial-table');
+            const tbody = table.querySelector('tbody');
+            const headers = table.querySelectorAll('th');
+            let sortColumn = null;
+            let sortDirection = 'asc';
+
+            // 点击页面显示表格
+            document.body.addEventListener('click', () => {
+                tbody.innerHTML = '';
+                const allBodies = galaxy.getAllBodies();
+                allBodies.forEach(body => {
+                    const row = document.createElement('tr');
+                    const nameCell = document.createElement('td');
+                    const massCell = document.createElement('td');
+                    const orbitRadiusCell = document.createElement('td');
+                    const colorCell = document.createElement('td');
+                    const diameterCell = document.createElement('td'); 
