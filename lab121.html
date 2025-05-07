@@ -1,0 +1,119 @@
+// 模拟太阳系天体数据
+const celestialBodies = [
+    {
+        name: 'Sun',
+        mass: 1.989e30,
+        orbitRadius: 0,
+        color: 'yellow',
+        diameter: 1391400,
+        angle: 0,
+        speed: 0
+    },
+    {
+        name: 'Mercury',
+        mass: 3.3011e23,
+        orbitRadius: 57.9e6,
+        color: 'gray',
+        diameter: 4880,
+        angle: 0,
+        speed: 0.005
+    },
+    {
+        name: 'Venus',
+        mass: 4.8675e24,
+        orbitRadius: 108.2e6,
+        color: 'orange',
+        diameter: 12103.6,
+        angle: 0,
+        speed: 0.003
+    },
+    // 可继续添加其他行星等天体数据
+];
+
+// 获取太阳系容器和表格元素
+const solarSystem = document.getElementById('solar-system');
+const table = document.getElementById('celestial-table');
+
+// 创建天体元素
+celestialBodies.forEach(body => {
+    if (body.orbitRadius > 0) {
+        const orbit = document.createElement('div');
+        orbit.classList.add('orbit');
+        orbit.style.width = body.orbitRadius / 100000 + 'px';
+        orbit.style.height = body.orbitRadius / 100000 + 'px';
+        orbit.style.left = '50%';
+        orbit.style.top = '50%';
+        solarSystem.appendChild(orbit);
+    }
+    const celestial = document.createElement('div');
+    celestial.classList.add(body.name === 'Sun' ? 'star' : 'planet');
+    celestial.style.width = body.diameter / 1000 + 'px';
+    celestial.style.height = body.diameter / 1000 + 'px';
+    celestial.style.backgroundColor = body.color;
+    celestial.style.left = '50%';
+    celestial.style.top = '50%';
+    solarSystem.appendChild(celestial);
+    body.element = celestial;
+});
+
+// 动画循环
+function animate() {
+    celestialBodies.forEach(body => {
+        if (body.speed > 0) {
+            body.angle += body.speed;
+            const x = Math.cos(body.angle) * body.orbitRadius / 100000 + solarSystem.offsetWidth / 2;
+            const y = Math.sin(body.angle) * body.orbitRadius / 100000 + solarSystem.offsetHeight / 2;
+            body.element.style.left = x + 'px';
+            body.element.style.top = y + 'px';
+        }
+    });
+    requestAnimationFrame(animate);
+}
+animate();
+
+// 点击页面显示表格
+document.body.addEventListener('click', () => {
+    const tbody = table.querySelector('tbody');
+    tbody.innerHTML = '';
+    celestialBodies.forEach(body => {
+        const row = document.createElement('tr');
+        const nameCell = document.createElement('td');
+        const massCell = document.createElement('td');
+        const orbitRadiusCell = document.createElement('td');
+        const colorCell = document.createElement('td');
+        const diameterCell = document.createElement('td');
+
+        nameCell.textContent = body.name;
+        massCell.textContent = body.mass;
+        orbitRadiusCell.textContent = body.orbitRadius;
+        colorCell.textContent = body.color;
+        diameterCell.textContent = body.diameter;
+
+        row.appendChild(nameCell);
+        row.appendChild(massCell);
+        row.appendChild(orbitRadiusCell);
+        row.appendChild(colorCell);
+        row.appendChild(diameterCell);
+        tbody.appendChild(row);
+    });
+    table.style.display = 'table';
+});
+
+// 表格排序功能
+const headers = table.querySelectorAll('th');
+headers.forEach(header => {
+    header.addEventListener('click', () => {
+        const columnIndex = Array.from(headers).indexOf(header);
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.sort((a, b) => {
+            const aValue = a.cells[columnIndex].textContent;
+            const bValue = b.cells[columnIndex].textContent;
+            if (columnIndex === 1 || columnIndex === 2 || columnIndex === 4) {
+                return parseFloat(aValue) - parseFloat(bValue);
+            }
+            return aValue.localeCompare(bValue);
+        });
+        rows.forEach(row => tbody.appendChild(row));
+    });
+});
