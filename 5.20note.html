@@ -24,3 +24,12 @@ mordern asynchous communication using Promise async function openpage (url)
 {method:'HEAD'});
 ret = response.ok;//boolean
 }catch(error)
+contst response = await fetch(url);
+if (response.ok==ture)
+{
+  let text = await response.text();
+  ///we expect the answer is the html codes with HTML table
+  //in home work
+
+   }
+testForm: let text = await response.text();
